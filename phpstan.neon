@@ -1,0 +1,22 @@
+includes:
+  - vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+  level: 5
+  paths:
+    - app
+  tmpDir: storage/phpstan
+  excludes:
+    - storage
+    - vendor
+    - node_modules
+
+  checkMissingIterableValueType: false
+  checkMissingCallableSignature: false
+  ignoreErrors:
+    - '#Call to an undefined method#'
+    - '#Call to protected method#'
+
+larastan:
+  checkModelProperties: true
+  checkModelNullability: true

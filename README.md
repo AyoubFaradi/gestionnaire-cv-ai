@@ -134,15 +134,38 @@ Une application web moderne qui aide les étudiants et jeunes diplômés à cré
 
 ### Installation avec Docker
 
-1. **Cloner et construire**
+1. **Créer le fichier .env**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Construire et démarrer les conteneurs**
    ```bash
    git clone https://github.com/AyoubFaradi/gestionnaire-cv-ai.git
    cd gestionnaire-cv-ai
-   docker-compose up --build
+   docker-compose up --build -d
    ```
 
-2. **Accéder à l'application**
-   - URL : http://localhost:8000
+3. **Exécuter les migrations**
+   ```bash
+   docker-compose exec app php artisan migrate --force
+   ```
+
+4. **Charger les données de test (optionnel)**
+   ```bash
+   docker-compose exec app php artisan db:seed
+   ```
+
+5. **Accéder à l'application**
+   - URL : http://localhost
+   - API : http://localhost/api
+   - Compte de test : jean.dupont@example.com / password123
+
+> **Note** : Vous pouvez utiliser le script setup.sh pour automiser ce processus :
+> ```bash
+> chmod +x setup.sh
+> ./setup.sh
+> ```
 
 ## 📚 Documentation API
 
@@ -269,51 +292,122 @@ Authorization: Bearer {token}
 ### Variables d'environnement
 
 ```bash
-# Application
+# ========== Application ==========
 APP_NAME="Gestionnaire Intelligent de CV"
-APP_ENV=local
-APP_KEY=base64:votre_cle_application
-APP_DEBUG=true
+APP_ENV=local                           # production, local, testing
+APP_KEY=                                 # Généré par: php artisan key:generate
+APP_DEBUG=true                           # false en production
 APP_URL=http://localhost:8000
 
-# Base de données
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+# ========== Database ==========
+DB_CONNECTION=mysql                      # mysql, sqlite
+DB_HOST=127.0.0.1                       # db pour Docker
 DB_PORT=3306
 DB_DATABASE=gestion_cv
 DB_USERNAME=root
 DB_PASSWORD=
 
-# Services IA
-OPENAI_API_KEY=votre_cle_openai
+# ========== Cache ==========
+CACHE_DRIVER=redis                       # redis, file, array
+CACHE_PREFIX=${APP_NAME}_cache:
 
-# Mail (optionnel)
+# ========== Session ==========
+SESSION_DRIVER=cookie                    # cookie, database, redis
+SESSION_LIFETIME=120
+
+# ========== Queue ==========
+QUEUE_CONNECTION=sync                    # sync, database, redis
+QUEUE_TIMEOUT=90
+
+# ========== Redis ==========
+REDIS_HOST=127.0.0.1                    # redis pour Docker
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+# ========== Services IA ==========
+OPENAI_API_KEY=sk-...                   # Clé API OpenAI
+OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_ORG_ID=                          # Optionnel
+
+# ========== Mail (optionnel) ==========
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=votre_email@gmail.com
-MAIL_PASSWORD=votre_password_app
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=465
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@example.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+# ========== Authentication ==========
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000
+SANCTUM_TOKEN_EXPIRATION=60
+
+# ========== CORS ==========
+FRONTEND_URL=http://localhost:3000
+
+# ========== Logging ==========
+LOG_CHANNEL=stack
+LOG_LEVEL=debug
 ```
+
+### Configuration fichier .env.example
+
+Un fichier [.env.example](.env.example) complet est fourni avec les variables essentielles et leurs valeurs par défaut.
 
 ## 🧪 Tests
 
-### Exécuter les tests
+### Exécuter les tests unitaires
 ```bash
 php artisan test
 ```
 
-### Tests avec coverage
+### Tests avec collecte de couverture
 ```bash
-php artisan test --coverage
+vendor/bin/phpunit --coverage-text --coverage-html=coverage
 ```
 
-### Linting du code
+### Analyse de code statique
 ```bash
-# PHP CS Fixer
-composer run lint
+# PHPStan pour la détection des bugs
+vendor/bin/phpstan analyse
 
-# PHPStan
-composer run analyse
+# PHP CS Fixer pour la cohérence du style
+vendor/bin/php-cs-fixer fix --dry-run
+```
+
+### Vérification de sécurité
+```bash
+vendor/bin/security-checker security:check
+```
+
+## 🔍 Dépannage
+
+### Erreurs courantes
+
+**1. Erreur de clé d'application**
+```bash
+php artisan key:generate
+```
+
+**2. Permissions de dossier (Linux/Mac)**
+```bash
+chmod -R 755 storage bootstrap/cache
+chown -R $USER:$USER storage bootstrap/cache
+```
+
+**3. Erreur de migration
+```bash
+# Reset complète de la base de données
+php artisan migrate:refresh --seed
+```
+
+**4. Cache à nettoyer
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+php artisan route:clear
 ```
 
 ## 📝 Développement
@@ -349,101 +443,99 @@ composer run analyse
 4. Créer une Pull Request
 5. Review et merge
 
-## 🐳 Docker
+## 🐳 Docker et Docker Compose
 
-### Dockerfile
-```dockerfile
-FROM php:8.2-fpm-alpine
+### Configuration avec Docker Compose
 
-WORKDIR /var/www/html
+Le projet inclut un `docker-compose.yml` complet avec les services suivants :
+- **app** : Application Laravel avec PHP-FPM
+- **db** : MySQL 8.0
+- **redis** : Cache Laravel
+- **nginx** : Serveur web
 
-# Install dependencies
-RUN apk add --no-cache \
-    libzip-dev \
-    zip \
-    libpng-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    intl-dev \
-    exif-dev
+### Prérequis Docker
+- Docker Engine 20.10+
+- Docker Compose 2.0+
 
-# Install PHP extensions
-RUN docker-php-ext-install \
-    pdo_mysql \
-    zip \
-    gd \
-    mbstring \
-    opcache \
-    bcmath \
-    intl \
-    exif
+### Démarrage rapide
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+1. **Créer le fichier .env depuis .env.example**
+   ```bash
+   cp .env.example .env
+   ```
 
-# Copy application
-COPY --chown=www-data:www-data . /var/www/html
+2. **Construire et démarrer les conteneurs**
+   ```bash
+   docker-compose up --build -d
+   ```
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+3. **Exécuter les migrations**
+   ```bash
+   docker-compose exec app php artisan migrate --force
+   ```
 
-# Generate application key
-RUN php artisan key:generate --force
+4. **Charger les données de test (optionnel)**
+   ```bash
+   docker-compose exec app php artisan db:seed
+   ```
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html
+5. **Accéder à l'application**
+   - URL : http://localhost
+   - API : http://localhost/api
+   - MySQL : localhost:3306
+   - Redis : localhost:6379
 
-EXPOSE 9000
+### Commandes utiles
 
-CMD ["php-fpm"]
+```bash
+# Arrêter les conteneurs
+docker-compose down
+
+# Supprimer tous les volumes (ATTENTION : supprime les données)
+docker-compose down -v
+
+# Voir les logs
+docker-compose logs -f app
+
+# Exécuter une commande
+docker-compose exec app php artisan migrate
+
+# Accéder au shell du conteneur
+docker-compose exec app sh
 ```
 
-### docker-compose.yml
-```yaml
-version: '3.8'
+### Variables d'environnement pour Docker
 
-services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: gestionnaire_cv_app
-    restart: unless-stopped
-    working_dir: /var/www/html
-    volumes:
-      - ./:/var/www/html
-    ports:
-      - "8000:8000"
-    environment:
-      - APP_NAME="Gestionnaire Intelligent de CV"
-      - APP_ENV=local
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_DATABASE=gestion_cv
-      - DB_USERNAME=root
-      - DB_PASSWORD=secret_password
-      - OPENAI_API_KEY=your_openai_api_key_here
-    depends_on:
-      - db
-    command: php artisan serve --host=0.0.0.0 --port=8000
+Le fichier `.env` doit contenir :
+```bash
+# Application running inside Docker
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost
 
-  db:
-    image: mysql:8.0
-    container_name: gestionnaire_cv_db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: gestion_cv
-      MYSQL_USER: gestion_user
-      MYSQL_PASSWORD: secret_password
-      MYSQL_ROOT_PASSWORD: secret_password
-    volumes:
-      - db_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+# Database (doit correspondre à docker-compose.yml)
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=gestion_cv
+DB_USERNAME=gestion_user
+DB_PASSWORD=secret_password
 
-volumes:
-  db_data:
-    driver: local
+# Redis (doit correspondre à docker-compose.yml)
+CACHE_DRIVER=redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# Services IA
+OPENAI_API_KEY=votre_cle_openai
+```
+
+### Permissions utilisateur
+
+Si vous rencontrez des problèmes de permissions :
+```bash
+# Exécuter comme utilisateur www-data dans le conteneur
+docker-compose exec -u www-data app php artisan migrate
 ```
 
 ## 🔄 CI/CD

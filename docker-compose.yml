@@ -13,23 +13,13 @@ services:
       - ./storage/app/public:/var/www/html/storage/app/public
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - APP_NAME="Gestionnaire Intelligent de CV"
-      - APP_ENV=local
-      - APP_KEY=base64:YOUR_APP_KEY_HERE
-      - APP_DEBUG=true
-      - APP_URL=http://localhost:8000
-      - DB_CONNECTION=mysql
+      - APP_ENV=${APP_ENV:-local}
       - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=gestion_cv
-      - DB_USERNAME=root
-      - DB_PASSWORD=secret_password
       - CACHE_DRIVER=redis
       - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
-      - REDIS_PORT=6379
-      - OPENAI_API_KEY=your_openai_api_key_here
     depends_on:
       - db
       - redis
@@ -42,10 +32,10 @@ services:
     container_name: gestionnaire_cv_db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: gestion_cv
-      MYSQL_USER: gestion_user
-      MYSQL_PASSWORD: secret_password
-      MYSQL_ROOT_PASSWORD: secret_password
+      MYSQL_DATABASE: ${DB_DATABASE:-gestion_cv}
+      MYSQL_USER: ${DB_USERNAME:-gestion_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     volumes:
@@ -54,6 +44,10 @@ services:
       - "3306:3306"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   redis:
     image: redis:7-alpine
@@ -65,6 +59,7 @@ services:
       - redis_data:/data
     networks:
       - app-network
+    command: redis-server --appendonly yes
 
   nginx:
     image: nginx:alpine
@@ -72,6 +67,7 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./:/var/www/html
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
