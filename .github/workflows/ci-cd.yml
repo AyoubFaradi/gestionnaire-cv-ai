@@ -50,25 +50,9 @@ jobs:
       
     - name: Set up .env testing
       run: |
-        php -r "
-        file_put_contents('.env', str_replace(
-            'DB_CONNECTION=sqlite',
-            'DB_CONNECTION=mysql',
-            file_get_contents('.env')
-        ));
-        php -r "
-        file_put_contents('.env', str_replace(
-            'DB_DATABASE=gestion_cv',
-            'DB_DATABASE=gestion_cv_test',
-            file_get_contents('.env')
-        ));
-        php -r "
-        file_put_contents('.env', str_replace(
-            'DB_HOST=127.0.0.1',
-            'DB_HOST=127.0.0.1',
-            file_get_contents('.env')
-        ));
-        "
+        sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/' .env
+        sed -i 's/DB_DATABASE=gestion_cv/DB_DATABASE=gestion_cv_test/' .env
+        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
         
     - name: Generate application key
       run: php artisan key:generate
