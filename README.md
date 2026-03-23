@@ -544,18 +544,12 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 
 - **[Ayoub Faradi]** - *Développeur principal* - [GitHub](https://github.com/AyoubFaradi)
 
-## 🙏 Remerciements
-
-- Laravel Framework pour l'excellent framework
-- OpenAI pour les services d'IA
-- La communauté Open Source
-
 ---
 
 ## 📞 Support
 
 Pour toute question ou suggestion :
-- **Email** : contact@example.com
+- **Email** : ayoubfaradi05@gmail.com
 - **GitHub Issues** : [Issues](https://github.com/AyoubFaradi/gestionnaire-cv-ai/issues)
 - **Documentation** : [Wiki](https://github.com/AyoubFaradi/gestionnaire-cv-ai/wiki)
 
