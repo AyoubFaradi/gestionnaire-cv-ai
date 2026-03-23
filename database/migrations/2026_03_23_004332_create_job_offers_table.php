@@ -13,16 +13,10 @@ return new class extends Migration
     {
         Schema::create('job_offers', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('company');
-            $table->text('description');
-            $table->string('location')->nullable();
-            $table->string('contract_type')->nullable();
-            $table->decimal('salary_min', 10, 2)->nullable();
-            $table->decimal('salary_max', 10, 2)->nullable();
-            $table->date('date_limite')->nullable();
-            $table->string('contact_email')->nullable();
-            $table->boolean('active')->default(true);
+            $table->string('title'); // Titre du poste
+            $table->string('company'); // Entreprise
+            $table->text('description'); // Description
+            $table->date('date_ajout'); // Date d'ajout
             $table->timestamps();
         });
     }

@@ -14,13 +14,12 @@ return new class extends Migration
         Schema::create('formations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('profile_id')->constrained()->onDelete('cascade');
-            $table->string('diplome');
-            $table->string('etablissement');
-            $table->text('description')->nullable();
-            $table->date('date_debut');
-            $table->date('date_fin')->nullable();
-            $table->boolean('actuel')->default(false);
-            $table->string('lieu')->nullable();
+            $table->string('etablissement'); // Établissement
+            $table->string('diplome'); // Diplôme
+            $table->string('specialite')->nullable(); // Spécialité
+            $table->text('description')->nullable(); // Description
+            $table->date('date_debut'); // Date de début
+            $table->date('date_fin')->nullable(); // Date de fin
             $table->timestamps();
         });
     }

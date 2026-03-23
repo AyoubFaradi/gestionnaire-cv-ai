@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['cv', 'lettre', 'email']);
-            $table->string('title');
-            $table->longText('content');
-            $table->string('file_path')->nullable();
-            $table->json('metadata')->nullable();
+            $table->enum('type', ['cv', 'lettre', 'email']); // Type
+            $table->string('title'); // Titre
+            $table->longText('content'); // Contenu
+            $table->string('modele_ia_utilise')->nullable(); // Modèle IA utilisé
+            $table->timestamp('date_generation')->nullable(); // Date de génération
             $table->timestamps();
         });
     }

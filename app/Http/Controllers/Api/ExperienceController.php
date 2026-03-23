@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Experience;
-use App\Models\Profile;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
 class ExperienceController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $profile = $request->user()->profile;
         
@@ -18,106 +18,87 @@ class ExperienceController extends Controller
             return response()->json(['message' => 'Profile not found'], 404);
         }
 
-        $experiences = $profile->experiences()->orderBy('date_debut', 'desc')->get();
-        
-        return response()->json($experiences);
+        $experiences = $profile->experiences()->orderBy('ordre', 'asc')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $experiences,
+            'message' => 'Experiences retrieved successfully'
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'poste' => 'required|string|max:255',
             'entreprise' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
             'date_debut' => 'required|date',
-            'date_fin' => 'nullable|date|after_or_equal:date_debut',
-            'actuel' => 'boolean',
-            'lieu' => 'nullable|string|max:255',
+            'date_fin' => 'nullable|date|after:date_debut',
+            'competences_associees' => 'nullable|array',
+            'ordre' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $profile = $request->user()->profile;
+        $experience = $request->user()->profile->experiences()->create($validator->validated());
+
+        return response()->json([
+            'success' => true,
+            'data' => $experience,
+            'message' => 'Experience created successfully'
+        ], 201);
+    }
+
+    public function show(Experience $experience): JsonResponse
+    {
+        $this->authorize('view', $experience);
         
-        if (!$profile) {
-            return response()->json(['message' => 'Profile not found'], 404);
-        }
-
-        $experience = Experience::create([
-            'profile_id' => $profile->id,
-            'poste' => $request->poste,
-            'entreprise' => $request->entreprise,
-            'description' => $request->description,
-            'date_debut' => $request->date_debut,
-            'date_fin' => $request->actuel ? null : $request->date_fin,
-            'actuel' => $request->actuel ?? false,
-            'lieu' => $request->lieu,
+        return response()->json([
+            'success' => true,
+            'data' => $experience,
+            'message' => 'Experience retrieved successfully'
         ]);
-
-        return response()->json($experience, 201);
     }
 
-    public function show(Request $request, $id)
+    public function update(Request $request, Experience $experience): JsonResponse
     {
-        $experience = Experience::findOrFail($id);
+        $this->authorize('update', $experience);
 
-        if ($experience->profile->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        return response()->json($experience);
-    }
-
-    public function update(Request $request, $id)
-    {
         $validator = Validator::make($request->all(), [
-            'poste' => 'sometimes|required|string|max:255',
-            'entreprise' => 'sometimes|required|string|max:255',
+            'poste' => 'required|string|max:255',
+            'entreprise' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'date_debut' => 'sometimes|required|date',
-            'date_fin' => 'nullable|date|after_or_equal:date_debut',
-            'actuel' => 'boolean',
-            'lieu' => 'nullable|string|max:255',
+            'date_debut' => 'required|date',
+            'date_fin' => 'nullable|date|after:date_debut',
+            'competences_associees' => 'nullable|array',
+            'ordre' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $experience = Experience::findOrFail($id);
+        $experience->update($validator->validated());
 
-        if ($experience->profile->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $data = $request->only(['poste', 'entreprise', 'description', 'date_debut', 'lieu']);
-        
-        if ($request->has('actuel')) {
-            $data['actuel'] = $request->actuel;
-            $data['date_fin'] = $request->actuel ? null : $experience->date_fin;
-        }
-        
-        if ($request->has('date_fin') && !$request->actuel) {
-            $data['date_fin'] = $request->date_fin;
-        }
-
-        $experience->update($data);
-
-        return response()->json($experience);
+        return response()->json([
+            'success' => true,
+            'data' => $experience,
+            'message' => 'Experience updated successfully'
+        ]);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Experience $experience): JsonResponse
     {
-        $experience = Experience::findOrFail($id);
-
-        if ($experience->profile->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
+        $this->authorize('delete', $experience);
+        
         $experience->delete();
 
-        return response()->json(['message' => 'Experience deleted successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Experience deleted successfully'
+        ]);
     }
 }

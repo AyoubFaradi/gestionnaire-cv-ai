@@ -5,22 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $profile = $request->user()->profile()->with(['experiences', 'formations', 'skills'])->first();
+        $profile = $request->user()->profile()->with(['experiences', 'formations', 'skills', 'languages'])->first();
         
         if (!$profile) {
             return response()->json(['message' => 'Profile not found'], 404);
         }
 
-        return response()->json($profile);
+        return response()->json([
+            'success' => true,
+            'data' => $profile,
+            'message' => 'Profile retrieved successfully'
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'title' => 'nullable|string|max:255',
@@ -39,33 +44,33 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Profile already exists'], 422);
         }
 
-        $profile = Profile::create([
-            'user_id' => $request->user()->id,
-            'title' => $request->title,
-            'summary' => $request->summary,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'linkedin' => $request->linkedin,
-            'github' => $request->github,
+        $profile = Profile::create(array_merge(
+            $validator->validated(),
+            ['user_id' => $request->user()->id]
+        ));
+
+        return response()->json([
+            'success' => true,
+            'data' => $profile,
+            'message' => 'Profile created successfully'
+        ], 201);
+    }
+
+    public function show(Profile $profile): JsonResponse
+    {
+        $this->authorize('view', $profile);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $profile->load(['experiences', 'formations', 'skills', 'languages']),
+            'message' => 'Profile retrieved successfully'
         ]);
-
-        return response()->json($profile, 201);
     }
 
-    public function show(Request $request, $id)
+    public function update(Request $request, Profile $profile): JsonResponse
     {
-        $profile = Profile::with(['experiences', 'formations', 'skills'])
-            ->findOrFail($id);
+        $this->authorize('update', $profile);
 
-        if ($profile->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        return response()->json($profile);
-    }
-
-    public function update(Request $request, $id)
-    {
         $validator = Validator::make($request->all(), [
             'title' => 'nullable|string|max:255',
             'summary' => 'nullable|string|max:2000',
@@ -79,29 +84,24 @@ class ProfileController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $profile = Profile::findOrFail($id);
+        $profile->update($validator->validated());
 
-        if ($profile->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $profile->update($request->only([
-            'title', 'summary', 'phone', 'address', 'linkedin', 'github'
-        ]));
-
-        return response()->json($profile);
+        return response()->json([
+            'success' => true,
+            'data' => $profile,
+            'message' => 'Profile updated successfully'
+        ]);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Profile $profile): JsonResponse
     {
-        $profile = Profile::findOrFail($id);
-
-        if ($profile->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
+        $this->authorize('delete', $profile);
+        
         $profile->delete();
 
-        return response()->json(['message' => 'Profile deleted successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile deleted successfully'
+        ]);
     }
 }

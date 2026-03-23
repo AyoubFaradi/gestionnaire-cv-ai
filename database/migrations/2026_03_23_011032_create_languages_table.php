@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('languages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('profile_id')->constrained()->onDelete('cascade');
-            $table->string('name'); // français, anglais, espagnol, etc.
-            $table->enum('level', ['debutant', 'elementaire', 'intermediaire', 'avance', 'bilingue', 'langue_maternelle'])->default('intermediaire');
-            $table->text('certification')->nullable(); // TOEIC, DELF, etc.
+            $table->string('name'); // Nom de la langue
+            $table->enum('level', ['debutant', 'elementaire', 'intermediaire', 'avance', 'bilingue', 'langue_maternelle'])->default('intermediaire'); // Niveau
             $table->timestamps();
         });
     }

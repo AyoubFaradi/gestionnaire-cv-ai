@@ -41,7 +41,7 @@ Une application web moderne qui aide les étudiants et jeunes diplômés à cré
 ### Backend
 - **Framework** : Laravel 12
 - **PHP** : 8.2+
-- **Base de données** : SQLite (dev) / MySQL (prod)
+- **Base de données** : MySQL 8.0+ (production)
 - **Authentification** : Laravel Sanctum
 - **API** : RESTful architecture
 
@@ -136,8 +136,8 @@ Une application web moderne qui aide les étudiants et jeunes diplômés à cré
 
 1. **Cloner et construire**
    ```bash
-   git clone https://github.com/votre-username/gestionnaire-cv-ia.git
-   cd gestionnaire-cv-ia
+   git clone https://github.com/AyoubFaradi/gestionnaire-cv-ai.git
+   cd gestionnaire-cv-ai
    docker-compose up --build
    ```
 
@@ -277,7 +277,7 @@ APP_DEBUG=true
 APP_URL=http://localhost:8000
 
 # Base de données
-DB_CONNECTION=sqlite  # ou mysql
+DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=gestion_cv

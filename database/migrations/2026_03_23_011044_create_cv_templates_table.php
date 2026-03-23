@@ -13,13 +13,9 @@ return new class extends Migration
     {
         Schema::create('cv_templates', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Moderne, Classique, Créatif, etc.
-            $table->string('style'); // Couleurs, polices, mise en page
-            $table->text('description')->nullable(); // Description du template
-            $table->json('options')->nullable(); // Options personnalisables (couleurs, sections, etc.)
-            $table->boolean('is_default')->default(false); // Template par défaut
-            $table->boolean('is_active')->default(true); // Template disponible
-            $table->string('preview_image')->nullable(); // Image de prévisualisation
+            $table->string('name'); // Templates (noms)
+            $table->string('style'); // Styles
+            $table->json('options')->nullable(); // Options
             $table->timestamps();
         });
     }

@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('experiences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('profile_id')->constrained()->onDelete('cascade');
-            $table->string('poste');
-            $table->string('entreprise');
-            $table->text('description')->nullable();
-            $table->date('date_debut');
-            $table->date('date_fin')->nullable();
-            $table->boolean('actuel')->default(false);
-            $table->string('lieu')->nullable();
+            $table->string('poste'); // Poste
+            $table->string('entreprise'); // Entreprise
+            $table->text('description')->nullable(); // Description
+            $table->date('date_debut'); // Date de début
+            $table->date('date_fin')->nullable(); // Date de fin
+            $table->json('competences_associees')->nullable(); // Compétences associées
+            $table->integer('ordre')->default(0); // Ordre
             $table->timestamps();
         });
     }
