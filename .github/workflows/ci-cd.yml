@@ -142,7 +142,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: votre-username/gestionnaire-cv-ia
+        images: ayoubfaradi/gestionnaire-cv-ai
         tags: |
           type=ref,event=branch
           type=ref,event=pr
