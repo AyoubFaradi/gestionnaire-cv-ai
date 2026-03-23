@@ -1,14 +1,14 @@
-# Gestionnaire Intelligent de CV avec IA
+# Gestionnaire Intelligent de CV avec IA - Backend API
 
-Une application web moderne qui aide les étudiants et jeunes diplômés à créer, gérer et optimiser leurs candidatures grâce à l'intelligence artificielle.
+API backend RESTful moderne qui aide les étudiants et jeunes diplômés à créer, gérer et optimiser leurs candidatures grâce à l'intelligence artificielle. Le frontend React frontal est développé séparément par l'équipe dédiée.
 
 ## 🎯 Objectifs
 
-- **Gestion complète du profil professionnel** : expériences, formations, compétences
-- **Génération intelligente de documents** : CV, lettres de motivation, emails
-- **Adaptation personnalisée** : contenu optimisé selon les offres d'emploi
-- **Interface moderne** : expérience utilisateur intuitive et responsive
-- **Sécurité** : protection des données personnelles
+- **API RESTful complète** : gestion des profils, expériences, formations, compétences
+- **Services IA intégrés** : génération de CV, lettres de motivation, emails
+- **Adaptation automatique** : contenu optimisé selon les offres d'emploi
+- **Authentification sécurisée** : Laravel Sanctum avec tokens API
+- **Protection des données** : validation, chiffrement et sécurité des données personnelles
 
 ## 🚀 Fonctionnalités principales
 
@@ -38,20 +38,22 @@ Une application web moderne qui aide les étudiants et jeunes diplômés à cré
 
 ## 🛠️ Stack technique
 
-### Backend
-- **Framework** : Laravel 12
+### Backend (API)
+- **Framework** : Laravel 12 (RESTful API)
 - **PHP** : 8.2+
-- **Base de données** : MySQL 8.0+ (production)
-- **Authentification** : Laravel Sanctum
-- **API** : RESTful architecture
+- **Base de données** : MySQL 8.0+ (production) / SQLite (développement)
+- **Authentification** : Laravel Sanctum (API tokens)
+- **Architecture** : Service-oriented + Repository pattern
+- **API Documentation** : Endpoints RESTful structurés
 
 ### Frontend
-- **HTML5** : Sémantique moderne
-- **CSS3** : TailwindCSS pour le design
-- **JavaScript** : Vanilla JS (compatibilité maximale)
-- **Responsive** : Mobile-first approach
+> **Frontend React développé séparément** par l'équipe frontend dédiée
+> - React 18+
+> - TypeScript
+> - Vite + TailwindCSS
+> - Intégration avec cette API via axios/fetch
 
-### IA & Services
+### Services & Technologies
 - **LLM** : OpenAI GPT-3.5-turbo
 - **HTTP Client** : Laravel HTTP Client
 - **Prompts optimisés** : templates structurés
@@ -61,7 +63,23 @@ Une application web moderne qui aide les étudiants et jeunes diplômés à cré
 - **CI/CD** : GitHub Actions
 - **Version control** : Git
 
-## 📦 Installation
+## 📦 Installation & Déploiement
+
+### Architecture
+```
+┌─────────────────────────────────────────┐
+│  Frontend React (Développé séparément)  │
+│  Repository: gestionnaire-cv-frontend   │
+└──────────────┬──────────────────────────┘
+               │ HTTP Calls / Axios
+┌──────────────▼──────────────────────────┐
+│  Backend Laravel API (ce repository)    │
+│  - RESTful Endpoints                    │
+│  - Authentication (Sanctum)             │
+│  - Services IA (OpenAI)                 │
+│  - Database Models                      │
+└─────────────────────────────────────────┘
+```
 
 ### Prérequis
 - PHP 8.2 ou supérieur
@@ -123,49 +141,38 @@ Une application web moderne qui aide les étudiants et jeunes diplômés à cré
    OPENAI_API_KEY=votre_cle_openai
    ```
 
-7. **Démarrer le serveur**
+7. **Démarrer le serveur API**
    ```bash
    php artisan serve
    ```
+   L'API sera disponible sur `http://127.0.0.1:8000/api`
 
-8. **Accéder à l'application**
-   - URL : http://127.0.0.1:8000
-   - Compte de test : jean.dupont@example.com / password123
-
-### Installation avec Docker
-
-1. **Créer le fichier .env**
-   ```bash
-   cp .env.example .env
+8. **Comptes de test**
    ```
+   Email : jean.dupont@example.com
+   Mot de passe : password123
+   ```
+   ℹ️ *Note: L'interface utilisateur (Frontend React) doit être démarrée séparément*
 
-2. **Construire et démarrer les conteneurs**
+### Installation & Lancement avec Docker
+
+1. **Cloner et construire le backend**
    ```bash
    git clone https://github.com/AyoubFaradi/gestionnaire-cv-ai.git
    cd gestionnaire-cv-ai
-   docker-compose up --build -d
+   docker-compose up --build
    ```
 
-3. **Exécuter les migrations**
+2. **API disponible sur**
+   - URL : `http://localhost:8000/api`
+   - Documentation interactive : `http://localhost:8000/api/docs` (optionnel)
+
+3. **Frontend React** (démarrer séparément)
    ```bash
-   docker-compose exec app php artisan migrate --force
+   git clone https://github.com/AyoubFaradi/gestionnaire-cv-frontend.git
+   cd gestionnaire-cv-frontend
+   npm install && npm run dev
    ```
-
-4. **Charger les données de test (optionnel)**
-   ```bash
-   docker-compose exec app php artisan db:seed
-   ```
-
-5. **Accéder à l'application**
-   - URL : http://localhost
-   - API : http://localhost/api
-   - Compte de test : jean.dupont@example.com / password123
-
-> **Note** : Vous pouvez utiliser le script setup.sh pour automiser ce processus :
-> ```bash
-> chmod +x setup.sh
-> ./setup.sh
-> ```
 
 ## 📚 Documentation API
 
@@ -289,145 +296,110 @@ Authorization: Bearer {token}
 
 ## 🔧 Configuration
 
-### Variables d'environnement
+### Variables d'environnement du Backend
 
 ```bash
-# ========== Application ==========
+# Application
 APP_NAME="Gestionnaire Intelligent de CV"
-APP_ENV=local                           # production, local, testing
-APP_KEY=                                 # Généré par: php artisan key:generate
-APP_DEBUG=true                           # false en production
+APP_ENV=local
+APP_KEY=base64:votre_cle_application
+APP_DEBUG=true
 APP_URL=http://localhost:8000
 
-# ========== Database ==========
-DB_CONNECTION=mysql                      # mysql, sqlite
-DB_HOST=127.0.0.1                       # db pour Docker
+# Base de données
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=gestion_cv
 DB_USERNAME=root
 DB_PASSWORD=
 
-# ========== Cache ==========
-CACHE_DRIVER=redis                       # redis, file, array
-CACHE_PREFIX=${APP_NAME}_cache:
+# Services IA
+OPENAI_API_KEY=votre_cle_openai
 
-# ========== Session ==========
-SESSION_DRIVER=cookie                    # cookie, database, redis
-SESSION_LIFETIME=120
-
-# ========== Queue ==========
-QUEUE_CONNECTION=sync                    # sync, database, redis
-QUEUE_TIMEOUT=90
-
-# ========== Redis ==========
-REDIS_HOST=127.0.0.1                    # redis pour Docker
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-# ========== Services IA ==========
-OPENAI_API_KEY=sk-...                   # Clé API OpenAI
-OPENAI_MODEL=gpt-3.5-turbo
-OPENAI_ORG_ID=                          # Optionnel
-
-# ========== Mail (optionnel) ==========
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.mailtrap.io
-MAIL_PORT=465
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@example.com
-MAIL_FROM_NAME="${APP_NAME}"
-
-# ========== Authentication ==========
-SANCTUM_STATEFUL_DOMAINS=localhost,localhost:3000
-SANCTUM_TOKEN_EXPIRATION=60
-
-# ========== CORS ==========
-FRONTEND_URL=http://localhost:3000
-
-# ========== Logging ==========
-LOG_CHANNEL=stack
-LOG_LEVEL=debug
+# CORS pour le Frontend React
+SANCTUM_STATEFUL_DOMAINS=localhost:3000,localhost:5173
+SESSION_DOMAIN=localhost
 ```
 
-### Configuration fichier .env.example
+### Configuration CORS pour le Frontend
 
-Un fichier [.env.example](.env.example) complet est fourni avec les variables essentielles et leurs valeurs par défaut.
+Le backend accepte les requêtes du frontend React. À configurer dans :
+- `config/cors.php` 
+- `.env` via `SANCTUM_STATEFUL_DOMAINS`
+
+### Variables d'environnement du Frontend React
+
+Le frontend doit configurer l'endpoint de l'API (à documenter dans le repository frontend) :
+```
+VITE_API_URL=http://localhost:8000/api
+```
+
+## 🔗 Intégration Frontend
+
+Ce repository contient **uniquement l'API backend**. Le frontend React est développé dans un repository séparé.
+
+### Communication entre Frontend et Backend
+
+**Frontend React** envoie des requêtes HTTP au **Backend Laravel** :
+
+```javascript
+// Exemple d'appel depuis le frontend React
+const response = await fetch('http://localhost:8000/api/profiles', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json'
+  }
+});
+```
+
+### Repositories liés
+- 📦 **Backend** (ce projet): `gestionnaire-cv-ai` - API Laravel
+- 🎨 **Frontend** (séparé): `gestionnaire-cv-frontend` - React + Vite (à développer)
 
 ## 🧪 Tests
 
-### Exécuter les tests unitaires
+### Exécuter les tests
 ```bash
 php artisan test
 ```
 
-### Tests avec collecte de couverture
+### Tests avec coverage
 ```bash
-vendor/bin/phpunit --coverage-text --coverage-html=coverage
+php artisan test --coverage
 ```
 
-### Analyse de code statique
+### Linting du code
 ```bash
-# PHPStan pour la détection des bugs
-vendor/bin/phpstan analyse
+# PHP CS Fixer
+composer run lint
 
-# PHP CS Fixer pour la cohérence du style
-vendor/bin/php-cs-fixer fix --dry-run
-```
-
-### Vérification de sécurité
-```bash
-vendor/bin/security-checker security:check
-```
-
-## 🔍 Dépannage
-
-### Erreurs courantes
-
-**1. Erreur de clé d'application**
-```bash
-php artisan key:generate
-```
-
-**2. Permissions de dossier (Linux/Mac)**
-```bash
-chmod -R 755 storage bootstrap/cache
-chown -R $USER:$USER storage bootstrap/cache
-```
-
-**3. Erreur de migration
-```bash
-# Reset complète de la base de données
-php artisan migrate:refresh --seed
-```
-
-**4. Cache à nettoyer
-```bash
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-php artisan route:clear
+# PHPStan
+composer run analyse
 ```
 
 ## 📝 Développement
 
-### Structure du projet
+### Structure du projet backend
 ```
 ├── app/
-│   ├── Http/Controllers/Api/    # Contrôleurs API
-│   ├── Models/                  # Modèles Eloquent
-│   ├── Services/AI/              # Services IA
-│   └── Http/Requests/          # FormRequests
+│   ├── Http/
+│   │   ├── Controllers/Api/    # Contrôleurs API endpoints
+│   │   ├── Middleware/         # Authentification, CORS
+│   │   └── Requests/           # Form validation
+│   ├── Models/                 # Modèles Eloquent (Profile, Experience, etc.)
+│   ├── Services/AI/            # Services IA (OpenAI integration)
+│   └── Providers/
 ├── database/
-│   ├── migrations/             # Migrations de BDD
-│   └── seeders/              # Données de test
+│   ├── migrations/             # Schéma de la BDD
+│   └── seeders/                # Données de test
 ├── routes/
-│   ├── api.php               # Routes API
-│   └── web.php               # Routes web
-├── resources/views/           # Vues Blade
-├── public/                  # Assets publics
-└── tests/                   # Tests unitaires
+│   ├── api.php                 # Routes de l'API RESTful
+│   └── console.php
+├── tests/                      # Tests unitaires et feature
+├── config/                     # Configuration (app, database, services)
+└── storage/                    # Logs, cache, files
 ```
 
 ### Conventions de code
@@ -443,99 +415,141 @@ php artisan route:clear
 4. Créer une Pull Request
 5. Review et merge
 
-## 🐳 Docker et Docker Compose
+## 🤝 Collaboration Backend/Frontend
 
-### Configuration avec Docker Compose
+Ce projet est divisé entre deux équipes/repositories :
 
-Le projet inclut un `docker-compose.yml` complet avec les services suivants :
-- **app** : Application Laravel avec PHP-FPM
-- **db** : MySQL 8.0
-- **redis** : Cache Laravel
-- **nginx** : Serveur web
+### Backend (Ce Repository)
+- **Développement** : API Laravel + Services IA
+- **Responsabilité** : Endpoints API, logique métier, authentification
+- **CI/CD** : Tests automatiques, qualité de code, build Docker
+- **Déploiement** : API sur serveur de production
 
-### Prérequis Docker
-- Docker Engine 20.10+
-- Docker Compose 2.0+
+### Frontend (Repository Séparé)
+- **Développement** : Application React
+- **Responsabilité** : Interface utilisateur, formulaires, intégration API
+- **Dépendance** : L'URL de l'API backend
+- **Communication** : HTTP requests vers les endpoints documentés
 
-### Démarrage rapide
+### Points de Coordination
+✅ Documentation des endpoints API à jour
+✅ Versions compatibles de Node/React et PHP/Laravel
+✅ CORS configuré correctement
+✅ Tokens Sanctum fonctionnels
+✅ Versioning d'API (ex: `/api/v1/` pour futures versions)
 
-1. **Créer le fichier .env depuis .env.example**
-   ```bash
-   cp .env.example .env
-   ```
+## 🚀 Pipeline CI/CD
 
-2. **Construire et démarrer les conteneurs**
-   ```bash
-   docker-compose up --build -d
-   ```
+Le pipeline GitHub Actions est configuré pour :
 
-3. **Exécuter les migrations**
-   ```bash
-   docker-compose exec app php artisan migrate --force
-   ```
+1. **Linting** : Code style avec PHP CS Fixer
+2. **Static Analysis** : PHPStan pour la vérification des types
+3. **Security** : Audit des dépendances Composer
+4. **Tests** : PHPUnit avec MySQL de test
+5. **Build Docker** : Construction multiarch (amd64, arm64)
 
-4. **Charger les données de test (optionnel)**
-   ```bash
-   docker-compose exec app php artisan db:seed
-   ```
+**Déclenché sur** :
+- Push sur `main` ou `develop`
+- Pull requests
 
-5. **Accéder à l'application**
-   - URL : http://localhost
-   - API : http://localhost/api
-   - MySQL : localhost:3306
-   - Redis : localhost:6379
+**Artefacts** :
+- Image Docker publiée sur GitHub Container Registry
 
-### Commandes utiles
+## 🐳 Docker
 
-```bash
-# Arrêter les conteneurs
-docker-compose down
+### Dockerfile
+```dockerfile
+FROM php:8.2-fpm-alpine
 
-# Supprimer tous les volumes (ATTENTION : supprime les données)
-docker-compose down -v
+WORKDIR /var/www/html
 
-# Voir les logs
-docker-compose logs -f app
+# Install dependencies
+RUN apk add --no-cache \
+    libzip-dev \
+    zip \
+    libpng-dev \
+    oniguruma-dev \
+    libxml2-dev \
+    intl-dev \
+    exif-dev
 
-# Exécuter une commande
-docker-compose exec app php artisan migrate
+# Install PHP extensions
+RUN docker-php-ext-install \
+    pdo_mysql \
+    zip \
+    gd \
+    mbstring \
+    opcache \
+    bcmath \
+    intl \
+    exif
 
-# Accéder au shell du conteneur
-docker-compose exec app sh
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy application
+COPY --chown=www-data:www-data . /var/www/html
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Generate application key
+RUN php artisan key:generate --force
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
 ```
 
-### Variables d'environnement pour Docker
+### docker-compose.yml
+```yaml
+version: '3.8'
 
-Le fichier `.env` doit contenir :
-```bash
-# Application running inside Docker
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://localhost
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gestionnaire_cv_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME="Gestionnaire Intelligent de CV"
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_DATABASE=gestion_cv
+      - DB_USERNAME=root
+      - DB_PASSWORD=secret_password
+      - OPENAI_API_KEY=your_openai_api_key_here
+    depends_on:
+      - db
+    command: php artisan serve --host=0.0.0.0 --port=8000
 
-# Database (doit correspondre à docker-compose.yml)
-DB_CONNECTION=mysql
-DB_HOST=db
-DB_PORT=3306
-DB_DATABASE=gestion_cv
-DB_USERNAME=gestion_user
-DB_PASSWORD=secret_password
+  db:
+    image: mysql:8.0
+    container_name: gestionnaire_cv_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: gestion_cv
+      MYSQL_USER: gestion_user
+      MYSQL_PASSWORD: secret_password
+      MYSQL_ROOT_PASSWORD: secret_password
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
 
-# Redis (doit correspondre à docker-compose.yml)
-CACHE_DRIVER=redis
-REDIS_HOST=redis
-REDIS_PORT=6379
-
-# Services IA
-OPENAI_API_KEY=votre_cle_openai
-```
-
-### Permissions utilisateur
-
-Si vous rencontrez des problèmes de permissions :
-```bash
-# Exécuter comme utilisateur www-data dans le conteneur
-docker-compose exec -u www-data app php artisan migrate
+volumes:
+  db_data:
+    driver: local
 ```
 
 ## 🔄 CI/CD
